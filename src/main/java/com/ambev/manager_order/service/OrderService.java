@@ -12,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -27,6 +29,10 @@ public class OrderService {
 
         Order order = orderMapper.toEntity(orderRequestDTO);
 
+        // if (isDuplicateOrder(orderRequestDTO)) {
+        //     throw new IllegalArgumentException("Já existe um pedido com esses dados.");
+        // }
+
         double total = order.getItems().stream()
                 .mapToDouble(item -> item.getPrice() * item.getQuantity())
                 .sum();
@@ -37,6 +43,17 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
         return orderMapper.toResponseDTO(savedOrder);
     }
+
+    // private boolean isDuplicateOrder(OrderRequestDTO orderRequestDTO) {
+    //     return orderRepository.existsByCustomerAndTotalAmountAndStatus(orderRequestDTO);
+    // }
+    
+    public List<OrderResponseDTO> processOrdersFromFile() {
+    List<Order> orders = orderRepository.findAll(); // Ou carregados do arquivo
+    return orders.stream()
+                 .map(orderMapper::toResponseDTO)
+                 .collect(Collectors.toList());
+}
 
     public OrderResponseDTO getOrderById(Long id) {
         Optional<Order> order = orderRepository.findById(id);
