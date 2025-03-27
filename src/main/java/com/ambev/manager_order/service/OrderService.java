@@ -10,6 +10,7 @@ import com.ambev.manager_order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +24,9 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderResponseConverter orderResponseConverter;
     private final OrderMapper orderMapper; 
+    private final RabbitTemplate rabbitTemplate;
+
+    private static final String ORDER_QUEUE = "orderQueue";
 
     @Transactional
     public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO) {
@@ -40,6 +44,10 @@ public class OrderService {
         order.setTotalAmount(total);
         order.setStatus("Processed");
         order.getItems().forEach(item -> item.setOrder(order));
+
+        rabbitTemplate.convertAndSend(ORDER_QUEUE, orderRequestDTO);
+        System.out.println("📤 Pedido enviado para a fila: " + orderRequestDTO);
+        
         Order savedOrder = orderRepository.save(order);
         return orderMapper.toResponseDTO(savedOrder);
     }

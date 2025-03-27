@@ -6,11 +6,11 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    
+
     private static final String QUEUE_NAME = "orders.queue";
 
     @Bean
     public Queue orderQueue() {
-        return new Queue(QUEUE_NAME, true);
+        return new Queue("orderQueue", true, false, false); // Durável e não exclusiva
     }
 }
