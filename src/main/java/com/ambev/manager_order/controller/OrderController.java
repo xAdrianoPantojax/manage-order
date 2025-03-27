@@ -2,6 +2,7 @@ package com.ambev.manager_order.controller;
 
 import com.ambev.manager_order.dto.OrderRequestDTO;
 import com.ambev.manager_order.dto.OrderResponseDTO;
+import com.ambev.manager_order.service.FileOrderConsumer;
 import com.ambev.manager_order.service.OrderService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +26,14 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
+    private final FileOrderConsumer fileOrderConsumer;
+
+    @Operation(summary = "Processa pedidos do arquivo orders.txt")
+    @GetMapping("/process-file-orders")
+    public ResponseEntity<List<OrderResponseDTO>> processFileOrders() {
+        List<OrderResponseDTO> processedOrders = orderService.processOrdersFromFile();
+        return ResponseEntity.ok(processedOrders);
+}
 
     @Operation(summary = "Create new order")
     @ApiResponses(value = {
